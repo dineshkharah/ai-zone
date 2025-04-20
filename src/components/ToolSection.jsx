@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { searchTools } from "../api";
 
-const ToolSection = ({ selectedTag }) => {
+const ToolSection = ({ selectedTag, searchQuery }) => {
   const [tools, setTools] = useState([]);
   const [filteredTools, setFilteredTools] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -8,27 +9,47 @@ const ToolSection = ({ selectedTag }) => {
 
   const toolsPerPage = 16; // Adjustable (16-20)
 
+  // 🔹 Fetch Tools Data
   useEffect(() => {
-    fetch("/all_ai_tool.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setTools(data);
-        setFilteredTools(data);
-      })
-      .catch((err) => console.error("Error loading tools:", err));
-  }, []);
+    const fetchData = async () => {
+      try {
+        let response;
+        if (searchQuery.trim() === "") {
+          response = await searchTools(""); // Fetch all tools if no query
+        } else {
+          response = await searchTools(searchQuery);
+        }
+
+        console.log("API Response:", response); // Debugging
+
+        setTools(response.results || []);
+        setFilteredTools(response.results || []);
+      } catch (error) {
+        console.error("Error fetching tools:", error);
+      }
+    };
+    fetchData();
+  }, [searchQuery]); // Ensures update when searchQuery changes
+
+
+
 
   useEffect(() => {
     if (selectedTag === "All") {
-      setFilteredTools(tools);
+      setFilteredTools(tools || []);
     } else {
       setFilteredTools(
-        tools.filter((tool) => tool["Useable For"]?.toLowerCase().includes(selectedTag.toLowerCase()))
+        tools.filter((tool) =>
+          (tool["Useable For"] || "").toLowerCase().includes(selectedTag.toLowerCase())
+        )
       );
     }
     setCurrentPage(1);
   }, [selectedTag, tools]);
 
+
+
+  // 🔹 Pagination Logic
   const totalPages = Math.ceil(filteredTools.length / toolsPerPage);
   const indexOfLastTool = currentPage * toolsPerPage;
   const indexOfFirstTool = indexOfLastTool - toolsPerPage;

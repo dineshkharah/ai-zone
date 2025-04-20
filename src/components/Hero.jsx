@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import ToolSection from "./ToolSection";
 
-const Hero = ({ setSelectedTag }) => {
+const Hero = ({ setSelectedTag, setSelectedSearchQuery }) => {
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedTagLocal, setSelectedTagLocal] = useState("All");
 
     const tags = [
         "All", "AI Detection", "Aggregators", "Avatar", "Chat", "Copywriting", "Finance", "For Fun",
@@ -10,6 +12,16 @@ const Hero = ({ setSelectedTag }) => {
         "Productivity", "Prompt Guides", "Research", "Self Improvement", "Social Media",
         "Speech To Text", "Text To Speech", "Text To Video", "Translation", "Video Editing", "Voice Modulation"
     ];
+
+    const handleTagClick = (tag) => {
+        setSelectedTag(tag);
+        setSelectedTagLocal(tag);
+    }
+
+    const handleSearch = () => {
+        setSelectedSearchQuery(searchQuery);
+    };
+
 
     return (
         <div className="bg-[#2b2b2b] text-white text-center py-12 px-4 w-full">
@@ -27,12 +39,17 @@ const Hero = ({ setSelectedTag }) => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="flex-grow bg-transparent outline-none text-white placeholder-gray-300 pl-3"
                         />
-                        <button className="btn btn-primary h-14 w-28 rounded-full text-base">SEARCH</button>
+                        <button
+                            className="btn btn-primary h-14 w-28 rounded-full text-base"
+                            onClick={handleSearch}
+                        >
+                            SEARCH
+                        </button>
                     </div>
                     <button className="btn btn-outline rounded-full p-5 text-base px-4 h-14">FREE NEWSLETTER</button>
                 </div>
 
-                {/* 📌 Sorting Dropdowns (Currently UI Only) */}
+                {/* Dropdown */}
                 <div className="flex flex-wrap justify-center gap-2 mt-6 w-full">
                     <select className="select select-bordered">
                         <option>Default (All)</option>
@@ -46,13 +63,13 @@ const Hero = ({ setSelectedTag }) => {
                     </select>
                 </div>
 
-                {/* 🏷️ Tags for Filtering */}
+                {/* Tags */}
                 <div className="flex flex-wrap justify-center gap-3 mt-6">
                     {tags.map((tag) => (
                         <span
                             key={tag}
                             className="badge badge-outline p-5 cursor-pointer hover:bg-primary hover:text-white"
-                            onClick={() => setSelectedTag(tag)}
+                            onClick={() => handleTagClick(tag)}
                         >
                             {tag}
                         </span>
