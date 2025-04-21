@@ -1,0 +1,29 @@
+.rainbow-shadow-login {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .rainbow-shadow-login::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 30px;
+    background: linear-gradient(270deg, #ff6ec4, #7873f5, #4ADEDE, #00ff95, #ff6ec4);
+    background-size: 400% 400%;
+    animation: rainbow-login 8s ease infinite;
+    filter: blur(50px);
+    z-index: -1;
+    border-radius: 2rem;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  
+  @keyframes rainbow-login {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  

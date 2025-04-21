@@ -1,18 +1,26 @@
-import React, { useState } from "react";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import ToolSection from "./components/ToolSection";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Welcome from "./components/Welcome/Welcome";
+import Login from "./components/Login/Login";
+import Tools from "./components/ToolsPage/Tools";
+import ProtectedRoute from "./security/ProtectedRoute";
 
 const App = () => {
-  const [selectedTag, setSelectedTag] = useState("All");
-  const [selectedSearchQuery, setSelectedSearchQuery] = useState("");
-
   return (
-    <div className="w-screen min-h-screen bg-[#2b2b2b]">
-      <Navbar />
-      <Hero setSelectedTag={setSelectedTag} setSelectedSearchQuery={setSelectedSearchQuery} />
-      <ToolSection selectedTag={selectedTag} searchQuery={selectedSearchQuery} />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Welcome />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/tools"
+          element={
+            <ProtectedRoute>
+              <Tools />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

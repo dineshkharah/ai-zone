@@ -1,3 +1,10 @@
+Prequisites:
+Withing the main directory : 
+python -m venv envDev
+envDev\Scripts\activate
+pip install -r requirements.txt
+npm install
+
 Backend running:
 uvicorn main:app --reload  
 
