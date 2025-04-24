@@ -47,26 +47,82 @@ def get_db():
 # === AI Search Section ===
 
 nltk.download("stopwords")
-df = pd.read_csv("all_ai_tool.csv")
+df = pd.read_csv("converted_file.csv")
 vectorizer = TfidfVectorizer(stop_words="english")
 tfidf_matrix = vectorizer.fit_transform(df["Description"].fillna(""))
+
 
 @app.get("/")
 def read_root():
     return {"message": "FastAPI is running!"}
 
+# @app.get("/search/")
+# def search_tools(query: str = ""):
+#     if not query:
+#         results = df[["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
+#         return {"query": query, "results": results}
+
+#     query_tfidf = vectorizer.transform([query])
+#     similarities = cosine_similarity(query_tfidf, tfidf_matrix).flatten()
+#     top_indices = similarities.argsort()[-20:][::-1]
+#     results = df.iloc[top_indices][["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
+
+#     return {"query": query, "results": results}
+
+
+
+# @app.get("/search/")
+# def search_tools(query: str = ""):
+#     if not query:
+#         results = df[["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
+#         return {"query": query, "results": results}
+
+#     major_category_matches = df[df["Major Category"].str.contains(query, case=False, na=False)]
+    
+#     if not major_category_matches.empty:
+#         results = major_category_matches[["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
+#         return {"query": query, "results": results}
+    
+#     query_tfidf = vectorizer.transform([query])
+#     similarities = cosine_similarity(query_tfidf, tfidf_matrix).flatten()
+#     top_indices = similarities.argsort()[-20:][::-1]
+#     results = df.iloc[top_indices][["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
+
+#     return {"query": query, "results": results}
+
 @app.get("/search/")
-def search_tools(query: str = ""):
+def search_tools(query: str = "", role: str = ""):
+    if not role:
+        raise HTTPException(status_code=400, detail="The 'role' parameter is required.")
+
+    # Filter the DataFrame for the given role
+    role_filtered_df = df[df["Category"].str.lower() == role.lower()]
+
+    if role_filtered_df.empty:
+        raise HTTPException(status_code=404, detail=f"No tools available for role: {role}")
+
+    # Case 1: No search query — return all tools for the role
     if not query:
-        results = df[["AI Tool Name", "Description", "Tool Link"]].to_dict(orient="records")
-        return {"query": query, "results": results}
+        results = role_filtered_df[["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
+        return {"query": query, "results": results, "matched_on": "All tools for role", "role": role}
 
-    query_tfidf = vectorizer.transform([query])
-    similarities = cosine_similarity(query_tfidf, tfidf_matrix).flatten()
+    # Case 2: Search query provided — match on One Word column
+    one_word_matches = role_filtered_df[role_filtered_df["One Word"].str.contains(query, case=False, na=False)]
+
+    if not one_word_matches.empty:
+        results = one_word_matches[["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
+        return {"query": query, "results": results, "matched_on": "One Word", "role": role}
+
+    # Case 3: Fallback to cosine similarity on description
+    vectorizer_role = TfidfVectorizer(stop_words="english")
+    tfidf_matrix_role = vectorizer_role.fit_transform(role_filtered_df["Description"].fillna(""))
+
+    query_tfidf = vectorizer_role.transform([query])
+    similarities = cosine_similarity(query_tfidf, tfidf_matrix_role).flatten()
     top_indices = similarities.argsort()[-20:][::-1]
-    results = df.iloc[top_indices][["AI Tool Name", "Description", "Tool Link"]].to_dict(orient="records")
+    results = role_filtered_df.iloc[top_indices][["AI Tool Name", "Description", "Tool Link", "One Word"]].to_dict(orient="records")
 
-    return {"query": query, "results": results}
+    return {"query": query, "results": results, "matched_on": "Description Cosine Similarity", "role": role}
 
 # === Auth Section ===
 

@@ -3,9 +3,24 @@
 const BASE_URL = "http://127.0.0.1:8000";
 
 // ========== TOOL SEARCH ==========
+// export const searchTools = async (query) => {
+//   try {
+//     const role = localStorage.getItem("role")
+//     const response = await fetch(`${BASE_URL}/search/?query=${query}&role=${role}`);
+//     const data = await response.json();
+//     return data;
+//   } catch (error) {
+//     console.error("Error fetching tools:", error);
+//     return [];
+//   }
+// };
 export const searchTools = async (query) => {
   try {
-    const response = await fetch(`${BASE_URL}/search/?query=${query}`);
+    const role = localStorage.getItem("role"); // Get role from localStorage
+    const encodedQuery = encodeURIComponent(query); // In case query has spaces/special chars
+    const response = await fetch(
+      `${BASE_URL}/search/?query=${encodedQuery}&role=${role}`
+    );
     const data = await response.json();
     return data;
   } catch (error) {
